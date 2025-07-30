@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo1/models/task.dart';
 import 'package:todo1/models/task_data.dart';
-import 'package:todo1/pages/add_task.dart';
 import 'package:todo1/services/database_services.dart';
 
 import '../task_tile.dart';
@@ -16,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Task>? tasks;
-
+  String taskTitle = "";
   getTasks() async {
     tasks = await DatabaseServices.getTasks();
     Provider.of<TasksData>(context, listen: false).tasks = tasks!;
@@ -35,11 +34,12 @@ class _HomePageState extends State<HomePage> {
         ? const Scaffold(body: Center(child: CircularProgressIndicator()))
         : Scaffold(
             appBar: AppBar(
+              backgroundColor: Colors.green.shade300,
               title: Text(
-                'Todo Tasks (${Provider.of<TasksData>(context).tasks.length})',
+                'Todo  ${Provider.of<TasksData>(context).tasks.length} tasks',
+                style: const TextStyle(color: Colors.white),
               ),
               centerTitle: true,
-              backgroundColor: Colors.green,
             ),
             body: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -55,17 +55,48 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Colors.green,
-              child: const Icon(Icons.add),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return const AddTaskPage();
-                  },
-                );
-              },
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: TextField(
+                        autofocus: true,
+                        onChanged: (val) {
+                          taskTitle = val;
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Add a new todo items',
+                          filled: true,
+                          fillColor: Colors.white,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.green),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.green),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  FloatingActionButton(
+                    backgroundColor: Colors.green,
+                    child: const Icon(Icons.add, color: Colors.white),
+                    onPressed: () {
+                      if (taskTitle.isNotEmpty) {
+                        Provider.of<TasksData>(
+                          context,
+                          listen: false,
+                        ).addTask(taskTitle);
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           );
   }
